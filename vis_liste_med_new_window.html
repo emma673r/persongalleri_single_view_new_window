@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Popup / Modal</title>
+    <style>
+      section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-rows: auto;
+      }
+
+      article {
+        border: 1px ridge orange;
+        border-radius: 15px 50px;
+        padding: 10px;
+        margin: 1em;
+        cursor: pointer;
+      }
+
+      img {
+        max-width: 200px;
+      }
+
+      .valgt {
+        color: white;
+        background-color: orange;
+      }
+
+      h1 {
+        color: orange;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header><h1>Alle</h1></header>
+    <nav>
+      <button data-troende="alle" class="valgt">Alle</button>
+      <button data-troende="ja">Ja</button>
+      <button data-troende="nej">Nej</button>
+      <button data-troende="tvivler">Tvivler</button>
+    </nav>
+
+    <template>
+      <article>
+        <h2></h2>
+        <p class="efternavn"></p>
+        <img src="" alt="" />
+        <p class="email"></p>
+        <p class="troende"></p>
+      </article>
+    </template>
+    <section></section>
+
+    <script>
+      const container = document.querySelector("section");
+      const temp = document.querySelector("template");
+      const header = document.querySelector("header h1");
+
+      const url = "https://persongalleri-5d3e.restdb.io/rest/persongalleri";
+      const key = "600fe9211346a1524ff12e31";
+      let personer;
+      let filter = "alle";
+
+      const options = {
+        headers: {
+          "x-apikey": key,
+        },
+      };
+
+      const knapper = document.querySelectorAll("button");
+
+      knapper.forEach((knap) =>
+        knap.addEventListener("click", filtrerPersoner)
+      );
+
+      document.addEventListener("DOMContentLoaded", start);
+
+      function start() {
+        hentData();
+      }
+
+      function filtrerPersoner() {
+        console.log("this er :", this);
+        filter = this.dataset.troende;
+        console.log("filter :", filter);
+        document.querySelector(".valgt").classList.remove("valgt");
+        this.classList.add("valgt");
+
+        visPersoner();
+        header.textContent = this.textContent;
+      }
+
+      async function hentData() {
+        const respons = await fetch(url, options);
+        personer = await respons.json();
+        visPersoner();
+        //løb igennem array "personliste"
+        console.log(personer);
+      }
+
+      function visPersoner() {
+        container.textContent = "";
+        personer.forEach((person) => {
+          // console.log("Troende", person.troende);
+          if (filter == person.troende || filter == "alle") {
+            const klon = temp.cloneNode(true).content;
+            klon.querySelector("h2").textContent = person.fornavn;
+            klon.querySelector("img").src = `/faces/${person.billede}`;
+            klon.querySelector("img").alt = person.billede;
+            klon
+              .querySelector("article")
+              .addEventListener("click", () => location.href = `vis_detaljer.html?id=${person._id}`);
+              console.log("person : ")
+            console.log(person);
+            container.appendChild(klon);
+          }
+        });
+      }
+
+
+
+      // function visDetaljer(personen) {
+      //   console.log("visDetaljer");
+      //   location.href = `vis_detaljer.html?id=${personen._id}`;
+      // }
+
+
+     
+    </script>
+  </body>
+</html>
